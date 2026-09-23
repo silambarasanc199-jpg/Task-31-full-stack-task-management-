@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Professional full-stack task management application"
+    >
+
+    <title>TaskFlow — Task Management</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ================= HEADER ================= -->
+
+    <header class="topbar">
+
+        <div class="brand">
+
+            <div class="brand-mark">
+                TF
+            </div>
+
+            <div>
+                <h1>TaskFlow</h1>
+                <p>Task Management System</p>
+            </div>
+
+        </div>
+
+        <div class="system-status">
+
+            <span
+                id="apiIndicator"
+                class="status-dot offline"
+            ></span>
+
+            <span id="apiStatus">
+                API Offline
+            </span>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="container">
+
+        <!-- Page heading -->
+
+        <section class="page-heading">
+
+            <div>
+
+                <span class="eyebrow">
+                    WORKSPACE / TASKS
+                </span>
+
+                <h2>
+                    Task Management
+                </h2>
+
+                <p>
+                    Create, organize and track your tasks
+                    through a connected REST API.
+                </p>
+
+            </div>
+
+            <button
+                id="newTaskBtn"
+                class="btn btn-primary"
+            >
+                <span>+</span>
+                New Task
+            </button>
+
+        </section>
+
+
+        <!-- ================= STATS ================= -->
+
+        <section class="stats-grid">
+
+            <article class="stat-card">
+
+                <div class="stat-label">
+                    TOTAL TASKS
+                </div>
+
+                <div
+                    id="totalCount"
+                    class="stat-value"
+                >
+                    0
+                </div>
+
+                <div class="stat-meta">
+                    All tasks
+                </div>
+
+            </article>
+
+
+            <article class="stat-card">
+
+                <div class="stat-label">
+                    TO DO
+                </div>
+
+                <div
+                    id="todoCount"
+                    class="stat-value"
+                >
+                    0
+                </div>
+
+                <div class="stat-meta">
+                    Pending work
+                </div>
+
+            </article>
+
+
+            <article class="stat-card">
+
+                <div class="stat-label">
+                    IN PROGRESS
+                </div>
+
+                <div
+                    id="progressCount"
+                    class="stat-value"
+                >
+                    0
+                </div>
+
+                <div class="stat-meta">
+                    Active work
+                </div>
+
+            </article>
+
+
+            <article class="stat-card">
+
+                <div class="stat-label">
+                    COMPLETED
+                </div>
+
+                <div
+                    id="completedCount"
+                    class="stat-value"
+                >
+                    0
+                </div>
+
+                <div class="stat-meta">
+                    Finished work
+                </div>
+
+            </article>
+
+        </section>
+
+
+        <!-- ================= TOOLBAR ================= -->
+
+        <section class="toolbar">
+
+            <div class="search-wrapper">
+
+                <span class="search-icon">
+                    /
+                </span>
+
+                <input
+                    type="search"
+                    id="searchInput"
+                    placeholder="Search tasks..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <div class="filter-group">
+
+                <select id="statusFilter">
+
+                    <option value="all">
+                        All Status
+                    </option>
+
+                    <option value="todo">
+                        To Do
+                    </option>
+
+                    <option value="in_progress">
+                        In Progress
+                    </option>
+
+                    <option value="completed">
+                        Completed
+                    </option>
+
+                </select>
+
+
+                <select id="priorityFilter">
+
+                    <option value="all">
+                        All Priority
+                    </option>
+
+                    <option value="low">
+                        Low
+                    </option>
+
+                    <option value="medium">
+                        Medium
+                    </option>
+
+                    <option value="high">
+                        High
+                    </option>
+
+                </select>
+
+
+                <button
+                    id="refreshBtn"
+                    class="btn btn-secondary"
+                    title="Refresh tasks"
+                >
+                    Refresh
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= TASK AREA ================= -->
+
+        <section class="task-section">
+
+            <div class="section-header">
+
+                <div>
+
+                    <span class="section-label">
+                        TASK REGISTER
+                    </span>
+
+                    <h3>
+                        Current Tasks
+                    </h3>
+
+                </div>
+
+                <span
+                    id="resultCount"
+                    class="result-count"
+                >
+                    0 results
+                </span>
+
+            </div>
+
+
+            <div
+                id="taskList"
+                class="task-list"
+            ></div>
+
+
+            <div
+                id="emptyState"
+                class="empty-state hidden"
+            >
+
+                <div class="empty-icon">
+                    —
+                </div>
+
+                <h3>
+                    No tasks found
+                </h3>
+
+                <p>
+                    Create a task or change your
+                    search and filter settings.
+                </p>
+
+                <button
+                    id="emptyCreateBtn"
+                    class="btn btn-primary"
+                >
+                    Create Task
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ================= CREATE / EDIT MODAL ================= -->
+
+    <div
+        id="taskModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-panel">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <span class="section-label">
+                        TASK EDITOR
+                    </span>
+
+                    <h2 id="modalTitle">
+                        Create Task
+                    </h2>
+
+                </div>
+
+                <button
+                    id="closeModalBtn"
+                    class="icon-btn"
+                    aria-label="Close"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form id="taskForm">
+
+                <input
+                    type="hidden"
+                    id="taskId"
+                >
+
+
+                <div class="form-group">
+
+                    <label for="title">
+                        Task Title
+                    </label>
+
+                    <input
+                        type="text"
+                        id="title"
+                        maxlength="200"
+                        placeholder="Enter task title"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="description">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="description"
+                        rows="5"
+                        placeholder="Describe the task..."
+                    ></textarea>
+
+                </div>
+
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label for="status">
+                            Status
+                        </label>
+
+                        <select id="status">
+
+                            <option value="todo">
+                                To Do
+                            </option>
+
+                            <option value="in_progress">
+                                In Progress
+                            </option>
+
+                            <option value="completed">
+                                Completed
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="priority">
+                            Priority
+                        </label>
+
+                        <select id="priority">
+
+                            <option value="low">
+                                Low
+                            </option>
+
+                            <option
+                                value="medium"
+                                selected
+                            >
+                                Medium
+                            </option>
+
+                            <option value="high">
+                                High
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="dueDate">
+                        Due Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="dueDate"
+                    >
+
+                </div>
+
+
+                <div class="modal-actions">
+
+                    <button
+                        type="button"
+                        id="cancelModalBtn"
+                        class="btn btn-secondary"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Save Task
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= VIEW MODAL ================= -->
+
+    <div
+        id="viewModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-panel">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <span class="section-label">
+                        TASK DETAILS
+                    </span>
+
+                    <h2 id="viewTitle">
+                        Task
+                    </h2>
+
+                </div>
+
+                <button
+                    id="closeViewBtn"
+                    class="icon-btn"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="detail-content">
+
+                <div
+                    id="viewBadges"
+                    class="badge-row"
+                ></div>
+
+
+                <div class="detail-block">
+
+                    <span>
+                        DESCRIPTION
+                    </span>
+
+                    <p id="viewDescription">
+                    </p>
+
+                </div>
+
+
+                <div class="detail-grid">
+
+                    <div class="detail-item">
+
+                        <span>
+                            DUE DATE
+                        </span>
+
+                        <strong id="viewDueDate">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="detail-item">
+
+                        <span>
+                            CREATED
+                        </span>
+
+                        <strong id="viewCreated">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= DELETE MODAL ================= -->
+
+    <div
+        id="deleteModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-panel small-panel">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <span class="section-label danger-text">
+                        CONFIRM ACTION
+                    </span>
+
+                    <h2>
+                        Delete Task?
+                    </h2>
+
+                </div>
+
+                <button
+                    id="closeDeleteBtn"
+                    class="icon-btn"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            <p class="confirmation-text">
+                This action cannot be undone.
+                The selected task will be permanently
+                removed from the database.
+            </p>
+
+            <div class="modal-actions">
+
+                <button
+                    id="cancelDeleteBtn"
+                    class="btn btn-secondary"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    id="confirmDeleteBtn"
+                    class="btn btn-danger"
+                >
+                    Delete Task
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= TOAST ================= -->
+
+    <div
+        id="toast"
+        class="toast"
+    >
+        <span id="toastMessage">
+            Message
+        </span>
+    </div>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer class="footer">
+
+        <span>
+            TASKFLOW / FULL-STACK TASK MANAGEMENT
+        </span>
+
+        <span>
+            FastAPI · SQLite · REST API
+        </span>
+
+    </footer>
+
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+
+</body>
+</html>
